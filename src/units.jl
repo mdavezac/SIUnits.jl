@@ -8,11 +8,10 @@ const DIMENSIONS = (
 include("dimensionality.jl")
 
 abstract Unit{NAME, DIMENSION <: Dimensionality}
-type Quantity{T <: Number, UNIT <: Unit}
-  value :: T
-end
-
 include("common_units.jl")
 
-
+type Quantity{T <: Number, UNIT <: Unit} <: Number
+  value :: T
+end
+include("quantities.jl")
 end
