@@ -1,3 +1,4 @@
+import Base: *, /, inv
 export @dimensionality, Length, Time, Mass, Weight, Area, Volume, Velocity
 export Acceleration, Density, Force, Energy, ElectricPotential
 const DIMENSIONS = (
@@ -31,6 +32,7 @@ macro dimensionality(args...)
   _create_dimensionality(;kwargs...)
 end
 
+typealias Undimensional @dimensionality
 typealias Length @dimensionality length=1
 typealias Time @dimensionality time=1
 typealias Mass @dimensionality mass=1
@@ -45,3 +47,26 @@ typealias Force @dimensionality length=1 mass=1 time=-2
 typealias Energy @dimensionality length=2 mass=1 time=-2
 typealias ElectricPotential
   @dimensionality mass=1 length=2 time=-3 electric_current=-1
+
+const DIMS2 = tuple([symbol(string(u) * "1") for u in DIMENSIONS]...)
+@eval begin
+  function *{$(hcat(DIMENSIONS..., DIMS2...)...)}(
+    ::Type{Dimensionality{$(DIMENSIONS...)}},
+    ::Type{Dimensionality{$(DIMS2...)}})
+    Dimensionality{([$(DIMENSIONS...)] + [$(DIMS2...)])...}
+  end
+  function /{$(hcat(DIMENSIONS..., DIMS2...)...)}(
+    ::Type{Dimensionality{$(DIMENSIONS...)}},
+    ::Type{Dimensionality{$(DIMS2...)}})
+    Dimensionality{([$(DIMENSIONS...)] - [$(DIMS2...)])...}
+  end
+  function ^{$(DIMENSIONS...)}(
+    ::Type{Dimensionality{$(DIMENSIONS...)}}, n::Integer)
+    Dimensionality{[$(DIMENSIONS...)]*n...}
+  end
+  function inv{$(DIMENSIONS...)}(::Type{Dimensionality{$(DIMENSIONS...)}})
+    Dimensionality{-[$(DIMENSIONS...)]...}
+  end
+end
+
+
