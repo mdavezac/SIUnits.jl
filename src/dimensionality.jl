@@ -1,6 +1,6 @@
 import Base: *, /, inv
 export @dimensionality, Length, Time, Mass, Weight, Area, Volume, Velocity
-export Acceleration, Density, Force, Energy, ElectricPotential
+export Acceleration, Density, Force, Energy, ElectricPotential, Nondimensional
 const DIMENSIONS = (
   :length, :mass, :time, :electric_current, :temperature, :amount,
   :luminosity, :angle, :solid_angle
@@ -32,7 +32,7 @@ macro dimensionality(args...)
   _create_dimensionality(;kwargs...)
 end
 
-typealias Undimensional @dimensionality
+typealias Nondimensional @dimensionality
 typealias Length @dimensionality length=1
 typealias Time @dimensionality time=1
 typealias Mass @dimensionality mass=1
