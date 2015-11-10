@@ -1,4 +1,4 @@
-import Base: *, /, inv
+import Base: *, /, inv, ^
 export @dimensionality, Length, Time, Mass, Weight, Area, Volume, Velocity
 export Acceleration, Density, Force, Energy, ElectricPotential, Nondimensional
 const DIMENSIONS = (
