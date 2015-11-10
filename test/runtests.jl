@@ -4,6 +4,8 @@ using Units
 
 
 facts("dimensionality") do
+  @fact sum([abs(u) for u in Length.parameters]) --> 1
+  @fact sum([abs(u) for u in (Length * Length).parameters]) --> 2
   @fact Length * Length --> @dimensionality length:2
   @fact Length * Time --> @dimensionality length:1 time:1
   @fact Length * Time --> not(@dimensionality length:2 time:1)
