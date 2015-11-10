@@ -6,53 +6,29 @@ macro units(name, args...)
   dimensionality = _create_dimensionality(;kwargs...)
   :(Unit{$name, $dimensionality})
 end
-typealias meter @units(:meter, length=1)
-typealias gram @units(:gram, mass=1)
-typealias second @units(:second, time=1)
-typealias ampere @units(:ampere, electric_current=1)
-typealias kelvin @units(:kelvin, temperature=1)
-typealias mol @units(:mol, amount=1)
-typealias candela @units(:candela, luminosity=1)
-typealias radian @units(:radian, angle=1)
-typealias steradian @units(:steradian, solid_angle=1)
-typealias newton @units :newton length=1 mass=1 time=-2
-typealias joule @units :joule length=2 mass=1 time=-2
-typealias volt @units :volt mass=1 length=2 time=-3 electric_current=-1
+typealias Meter @units(:meter, length=1)
+typealias Gram @units(:gram, mass=1)
+typealias Kilogram @units(:Kilogram, mass=1)
+typealias Second @units(:second, time=1)
+typealias Ampere @units(:ampere, electric_current=1)
+typealias Kelvin @units(:kelvin, temperature=1)
+typealias Mol @units(:mol, amount=1)
+typealias Candela @units(:candela, luminosity=1)
+typealias Radian @units(:radian, angle=1)
+typealias Steradian @units(:steradian, solid_angle=1)
+typealias Newton @units :newton length=1 mass=1 time=-2
+typealias Joule @units :joule length=2 mass=1 time=-2
+typealias Volt @units :volt mass=1 length=2 time=-3 electric_current=-1
 
-function define_other_magnitudes(unit, prefixes)
-  result = quote end
-  for (prefix, factor) in prefixes
-    name = symbol("$prefix$(unit.parameters[1])")
-    dims = unit.parameters[2]
-    exponent = factor
-    block = quote
-      typealias $name Unit{$(parse(":" * string(name))), $dims}
-      conversion_factor{T <: FloatingPoint}(::Type{$name}, ::Type{T}) =
-          convert(T, 10)^$exponent
-      conversion_factor(::Type{$name}) = conversion_factor($name, FloatingPoint)
-    end
-    append!(result.args, block.args)
-  end
-  result
-end
-function define_other_magnitudes(unit)
-  prefixes = {
-    :peta => 15, :tera => 12, :giga => 9, :mega => 6,
-    :kilo => 3, :hecto => 2, :deca => 10,
-    :deci => -1, :centi => -2, :milli => -3,
-    :micro => -6, :nano => -9, :femto => -12,
-    :atto => -15
-  }
-  define_other_magnitudes(unit, prefixes)
-end
+conversion_factor{N1, N2, D1 <: Dimensionality, D2 <: Dimensionality}(
+  ::Type{Unit{N1, D1}}, ::Type{Unit{N2, D2}}) =
+  D1 == D2 ?
+    conversion_factor(Unit{N1, D1}) / conversion_factor(Unit{N2, D2}):
+    error("Incompatible units")
 
-for unit in [meter, gram, second, ampere, kelvin, mol, candela, radian,
-  steradian, joule, newton, volt]
-  eval(define_other_magnitudes(unit))
+conversion_factor{T <:Unit}(::Type{T}, ::Type{T}) = 1
+conversion_factor(::Type{Gram}) = 1//1000
+for unit in [Meter, Kilogram, Second, Ampere, Kelvin, Mol, Candela, Radian,
+  Steradian, Newton, Joule, Volt]
   @eval conversion_factor(::Type{$unit}) = 1
 end
-conversion_factor{T <: Unit}(::Type{T}, ::Type{T}) = 1
-conversion_factor{N1, N2, D}(::Type{Unit{N1, D}}, ::Type{Unit{N2, D}}) =
-  conversion_factor(Unit{N1, D}) / conversion_factor(Unit{N2, D})
-conversion_factor{N1, N2, D, T}(::Type{Unit{N1, D}}, ::Type{Unit{N2, D}}, ::Type{T}) =
-  conversion_factor(Unit{N1, D}, T) / conversion_factor(Unit{N2, D}, T)
