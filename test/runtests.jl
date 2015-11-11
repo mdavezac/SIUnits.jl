@@ -32,5 +32,23 @@ facts("units") do
   @fact_throws Exception Units.conversion_factor(Units.Meter, Units.Kilogram)
 end
 
+facts("quantity") do
+  const meter = quantity(1, Units.Meter)
+  const kilometer = quantity(1000, Units.Meter)
+
+  context("type properties") do
+    @fact value(meter) --> 1
+    @fact value(kilometer) --> 1000
+    @fact unit(meter) --> Units.Meter
+    @fact unit(kilometer) --> Units.Meter
+    @fact unit_system(meter) --> Units.SI
+    @fact unit_system(kilometer) --> Units.SI
+  end
+
+  context("Operators") do
+    @fact value(1000 * meter) --> 1000
+  end
+end
+
 FactCheck.exitstatus()
 end
